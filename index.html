@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>India Job Scanner</title>
+<meta name="description" content="Scans career portals of top Indian companies and ranks openings by how eligible you actually are.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎯</text></svg>">
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="wrap topbar-inner">
+    <div class="brand">
+      <span class="brand-mark">IJS</span>
+      <div>
+        <h1>India Job Scanner</h1>
+        <p>Live openings from top Indian employers, ranked by real eligibility</p>
+      </div>
+    </div>
+    <nav class="tabs" role="tablist">
+      <button class="tab is-active" data-tab="search" role="tab">Find jobs</button>
+      <button class="tab" data-tab="coverage" role="tab">Company coverage</button>
+      <button class="tab" data-tab="health" role="tab">Connector status</button>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- ══════════════ SEARCH ══════════════ -->
+  <section id="panel-search" class="panel">
+
+    <form id="profile-form" class="card form">
+      <div class="form-head">
+        <h2>Tell the scanner about you</h2>
+        <p>Everything is optional except the role. The more you fill in, the sharper the ranking.</p>
+      </div>
+
+      <div class="grid">
+        <label class="field span2">
+          <span class="label">What role are you looking for? <b class="req">required</b></span>
+          <input id="roleText" type="text" placeholder="e.g. Financial Analyst, Investment Banking Associate, Product Manager" autocomplete="off" required>
+          <span class="hint">Type it the way it would appear in a job title.</span>
+        </label>
+
+        <label class="field">
+          <span class="label">Years of experience</span>
+          <div class="years-row">
+            <input id="years" type="range" min="0" max="20" step="1" value="1">
+            <output id="yearsOut" class="years-out">1 yr</output>
+          </div>
+          <span class="hint">0 means fresher / final year.</span>
+        </label>
+
+        <label class="field">
+          <span class="label">Open to remote roles?</span>
+          <select id="openToRemote">
+            <option value="yes" selected>Yes — include remote jobs</option>
+            <option value="no">No — on-site in my cities only</option>
+          </select>
+        </label>
+
+        <div class="field span2">
+          <span class="label">Role family <span class="opt">pick up to 3 — teaches the scanner your vocabulary</span></span>
+          <div id="roleFamilies" class="chips"></div>
+        </div>
+
+        <div class="field span2">
+          <span class="label">Preferred locations <span class="opt">leave empty for anywhere in India</span></span>
+          <div id="locations" class="chips"></div>
+        </div>
+
+        <div class="field span2">
+          <span class="label">Target industries <span class="opt">optional — boosts matches in these sectors</span></span>
+          <div id="industries" class="chips chips-sm"></div>
+        </div>
+
+        <label class="field span2">
+          <span class="label">Your background</span>
+          <textarea id="background" rows="3" placeholder="e.g. B.Com from SRCC, 1 year as EA to CFO at an NBFC, ACCA part-qualified. Strong in Excel, financial modelling, MIS reporting, board reporting."></textarea>
+          <span class="hint">Plain sentences are fine — qualifications, tools, sectors you have worked in.</span>
+        </label>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary" id="scanBtn">Scan career portals</button>
+        <button type="button" class="btn btn-ghost" id="resetBtn">Reset</button>
+        <span class="saved-note" id="savedNote"></span>
+      </div>
+    </form>
+
+    <div id="status" class="status" hidden></div>
+
+    <section id="results" hidden>
+      <div class="kpis" id="kpis"></div>
+
+      <div class="results-head">
+        <h2>Matched openings</h2>
+        <div class="filters">
+          <label class="mini">
+            Show
+            <select id="filterBand">
+              <option value="eligible" selected>Eligible only</option>
+              <option value="all">Everything found</option>
+              <option value="perfect">Perfect fits only</option>
+            </select>
+          </label>
+          <label class="mini">
+            Industry
+            <select id="filterIndustry"><option value="">All</option></select>
+          </label>
+          <button type="button" class="btn btn-small" id="downloadCsv">Download CSV</button>
+        </div>
+      </div>
+
+      <div id="jobList" class="job-list"></div>
+      <p id="emptyNote" class="empty" hidden></p>
+    </section>
+  </section>
+
+  <!-- ══════════════ COVERAGE ══════════════ -->
+  <section id="panel-coverage" class="panel" hidden>
+    <div class="card">
+      <div class="form-head">
+        <h2>Companies this bot covers</h2>
+        <p>Every company below is one click from a live search. <b class="dot live"></b> Live feed means the scanner reads its openings automatically. The rest open with your role pre-filled.</p>
+      </div>
+      <div class="coverage-controls">
+        <input id="coverageSearch" type="search" placeholder="Search company or industry…">
+        <select id="coverageIndustry"><option value="">All industries</option></select>
+        <label class="mini check"><input type="checkbox" id="coverageLiveOnly"> Live feeds only</label>
+      </div>
+      <div id="coverageStats" class="coverage-stats"></div>
+      <div id="coverageList" class="coverage-list"></div>
+    </div>
+  </section>
+
+  <!-- ══════════════ HEALTH ══════════════ -->
+  <section id="panel-health" class="panel" hidden>
+    <div class="card">
+      <div class="form-head">
+        <h2>Connector status</h2>
+        <p>Which career portals answered on the last scan. A portal that stops responding is skipped automatically — the company still appears under Coverage.</p>
+      </div>
+      <div id="healthList" class="health-list">
+        <p class="empty">Run a scan first and the results will appear here.</p>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="foot wrap">
+  <p>Runs entirely on your own Netlify site or your own machine. No AI credits are used after setup — the scanner is plain code.</p>
+</footer>
+
+<script src="assets/app.js"></script>
+</body>
+</html>

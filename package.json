@@ -1,0 +1,16 @@
+{
+  "name": "india-job-scanner",
+  "version": "1.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Scans career portals of top Indian companies and ranks openings by how eligible you actually are.",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "login": "npx -y netlify-cli login",
+    "deploy": "npx -y netlify-cli deploy --prod --dir=. --functions=netlify/functions"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
