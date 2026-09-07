@@ -1,0 +1,754 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>India Job Scanner</title>
+<meta name="description" content="Scans career portals of top Indian companies and ranks openings by how eligible you actually are.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎯</text></svg>">
+<style>
+/* India Job Scanner — styles */
+
+:root {
+  --bg: #f6f7f9;
+  --surface: #ffffff;
+  --surface-2: #f2f4f7;
+  --border: #e2e6ec;
+  --text: #17202b;
+  --muted: #64707f;
+  --accent: #1d4ed8;
+  --accent-soft: #e8eeff;
+  --perfect: #0f7b52;
+  --perfect-bg: #e4f5ed;
+  --strong: #1d4ed8;
+  --strong-bg: #e8eeff;
+  --stretch: #a35a06;
+  --stretch-bg: #fdf0dd;
+  --reach: #6b7280;
+  --reach-bg: #eef0f3;
+  --danger: #b3261e;
+  --radius: 12px;
+  --shadow: 0 1px 2px rgba(16,24,40,.05), 0 8px 24px rgba(16,24,40,.05);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0f1419;
+    --surface: #161c24;
+    --surface-2: #1d252f;
+    --border: #2a343f;
+    --text: #e7edf4;
+    --muted: #94a3b4;
+    --accent: #6f9bff;
+    --accent-soft: #1b2740;
+    --perfect: #56d3a0; --perfect-bg: #10281f;
+    --strong: #7ea6ff;  --strong-bg: #16233b;
+    --stretch: #e0a458; --stretch-bg: #2e2314;
+    --reach: #94a3b4;   --reach-bg: #212a34;
+    --danger: #ff8a80;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.25);
+  }
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 15px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, "Helvetica Neue", Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+.wrap { max-width: 1080px; margin: 0 auto; padding: 0 20px; }
+
+/* ── Top bar ─────────────────────────────────────────────── */
+.topbar {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 20;
+}
+.topbar-inner {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 20px; flex-wrap: wrap; padding-top: 14px; padding-bottom: 14px;
+}
+.brand { display: flex; align-items: center; gap: 12px; }
+.brand-mark {
+  display: grid; place-items: center;
+  width: 40px; height: 40px; border-radius: 10px;
+  background: var(--accent); color: #fff;
+  font-weight: 700; font-size: 13px; letter-spacing: .5px;
+}
+.brand h1 { font-size: 17px; margin: 0; letter-spacing: -.2px; }
+.brand p { margin: 1px 0 0; font-size: 12.5px; color: var(--muted); }
+
+.tabs { display: flex; gap: 4px; background: var(--surface-2); padding: 4px; border-radius: 10px; }
+.tab {
+  border: 0; background: transparent; color: var(--muted);
+  font: inherit; font-size: 13.5px; font-weight: 500;
+  padding: 7px 14px; border-radius: 7px; cursor: pointer;
+}
+.tab:hover { color: var(--text); }
+.tab.is-active { background: var(--surface); color: var(--text); box-shadow: 0 1px 2px rgba(16,24,40,.08); }
+
+main { padding: 24px 20px 40px; }
+.panel { animation: fade .18s ease; }
+@keyframes fade { from { opacity: 0; transform: translateY(4px); } }
+
+/* ── Card / form ─────────────────────────────────────────── */
+.card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); box-shadow: var(--shadow); padding: 22px;
+}
+.form-head h2 { margin: 0 0 4px; font-size: 17px; letter-spacing: -.2px; }
+.form-head p { margin: 0 0 18px; color: var(--muted); font-size: 13.5px; }
+
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.span2 { grid-column: 1 / -1; }
+@media (max-width: 720px) { .grid { grid-template-columns: 1fr; } }
+
+.field { display: flex; flex-direction: column; gap: 6px; }
+.label { font-size: 13px; font-weight: 600; }
+.req { color: var(--accent); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: .4px; }
+.opt { color: var(--muted); font-weight: 400; font-size: 12px; }
+.hint { font-size: 12px; color: var(--muted); }
+
+input[type=text], input[type=search], textarea, select {
+  width: 100%; padding: 9px 11px;
+  border: 1px solid var(--border); border-radius: 8px;
+  background: var(--surface); color: var(--text);
+  font: inherit; font-size: 14px;
+}
+textarea { resize: vertical; }
+input:focus, textarea:focus, select:focus {
+  outline: none; border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.years-row { display: flex; align-items: center; gap: 12px; }
+input[type=range] { flex: 1; accent-color: var(--accent); }
+.years-out {
+  min-width: 62px; text-align: center; font-weight: 600; font-size: 13px;
+  background: var(--surface-2); border-radius: 6px; padding: 5px 8px;
+}
+
+/* ── Chips ───────────────────────────────────────────────── */
+.chips { display: flex; flex-wrap: wrap; gap: 7px; }
+.chip {
+  border: 1px solid var(--border); background: var(--surface);
+  color: var(--muted); font: inherit; font-size: 12.5px;
+  padding: 6px 12px; border-radius: 999px; cursor: pointer;
+  transition: .12s;
+}
+.chip:hover { border-color: var(--accent); color: var(--text); }
+.chip.on { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 500; }
+.chips-sm .chip { font-size: 12px; padding: 5px 10px; }
+
+/* ── Buttons ─────────────────────────────────────────────── */
+.btn {
+  font: inherit; font-size: 14px; font-weight: 500;
+  padding: 10px 18px; border-radius: 8px; cursor: pointer;
+  border: 1px solid var(--border); background: var(--surface); color: var(--text);
+}
+.btn:hover { border-color: var(--muted); }
+.btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.btn-primary:hover { filter: brightness(1.08); }
+.btn-primary:disabled { opacity: .6; cursor: progress; }
+.btn-ghost { background: transparent; }
+.btn-small { padding: 6px 12px; font-size: 12.5px; }
+.form-actions { display: flex; align-items: center; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
+.saved-note { font-size: 12px; color: var(--muted); }
+
+/* ── Status ──────────────────────────────────────────────── */
+.status {
+  margin-top: 16px; padding: 12px 16px; border-radius: 8px;
+  background: var(--accent-soft); color: var(--text);
+  font-size: 13.5px; border: 1px solid var(--border);
+}
+.status.err { background: var(--stretch-bg); }
+
+/* ── KPIs ────────────────────────────────────────────────── */
+.kpis {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px; margin: 22px 0 6px;
+}
+.kpi {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 10px; padding: 14px 16px;
+}
+.kpi .n { font-size: 24px; font-weight: 700; letter-spacing: -.5px; }
+.kpi .l { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.kpi.hi .n { color: var(--perfect); }
+
+/* ── Results ─────────────────────────────────────────────── */
+.results-head {
+  display: flex; align-items: flex-end; justify-content: space-between;
+  gap: 16px; flex-wrap: wrap; margin: 24px 0 12px;
+}
+.results-head h2 { margin: 0; font-size: 17px; }
+.filters { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.mini { font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+.mini select { width: auto; padding: 6px 9px; font-size: 12.5px; }
+.check { gap: 5px; }
+
+.job-list { display: flex; flex-direction: column; gap: 10px; }
+.job {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 10px; padding: 16px 18px;
+  display: grid; grid-template-columns: 1fr auto; gap: 14px;
+}
+.job.perfect { border-left: 3px solid var(--perfect); }
+.job.strong  { border-left: 3px solid var(--strong); }
+.job.stretch { border-left: 3px solid var(--stretch); }
+.job.reach   { border-left: 3px solid var(--reach); }
+
+.job-title { margin: 0 0 3px; font-size: 15.5px; font-weight: 600; letter-spacing: -.1px; }
+.job-title a { color: inherit; text-decoration: none; }
+.job-title a:hover { color: var(--accent); text-decoration: underline; }
+.job-meta { font-size: 12.5px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 4px 10px; margin-bottom: 8px; }
+.job-meta b { color: var(--text); font-weight: 600; }
+
+.why { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+.why span {
+  font-size: 11.5px; padding: 3px 9px; border-radius: 6px;
+  background: var(--perfect-bg); color: var(--perfect);
+}
+.why span.gap { background: var(--stretch-bg); color: var(--stretch); }
+
+.job-right { text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
+.score { font-size: 26px; font-weight: 700; letter-spacing: -1px; line-height: 1; }
+.badge {
+  font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 999px;
+  text-transform: uppercase; letter-spacing: .3px; white-space: nowrap;
+}
+.badge.perfect { background: var(--perfect-bg); color: var(--perfect); }
+.badge.strong  { background: var(--strong-bg);  color: var(--strong); }
+.badge.stretch { background: var(--stretch-bg); color: var(--stretch); }
+.badge.reach   { background: var(--reach-bg);   color: var(--reach); }
+.bars { display: flex; gap: 3px; margin-top: 2px; }
+.bars i { display: block; width: 26px; height: 4px; border-radius: 2px; background: var(--surface-2); }
+.bars i b { display: block; height: 100%; border-radius: 2px; background: var(--accent); }
+.apply {
+  font-size: 12.5px; font-weight: 600; text-decoration: none;
+  color: var(--accent); border: 1px solid var(--accent);
+  padding: 6px 14px; border-radius: 7px;
+}
+.apply:hover { background: var(--accent); color: #fff; }
+@media (max-width: 640px) {
+  .job { grid-template-columns: 1fr; }
+  .job-right { flex-direction: row; align-items: center; justify-content: space-between; text-align: left; }
+}
+
+.empty { color: var(--muted); font-size: 13.5px; text-align: center; padding: 30px 0; }
+
+/* ── Coverage ────────────────────────────────────────────── */
+.coverage-controls { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+.coverage-controls input[type=search] { flex: 1; min-width: 200px; }
+.coverage-controls select { width: auto; }
+.coverage-controls .check {
+  flex: none; gap: 7px; white-space: nowrap;
+  border: 1px solid var(--border); border-radius: 8px; padding: 0 12px;
+}
+.coverage-controls .check input { width: auto; margin: 0; accent-color: var(--accent); }
+.coverage-stats { font-size: 12.5px; color: var(--muted); margin-bottom: 12px; }
+.coverage-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 8px; }
+.cov {
+  border: 1px solid var(--border); border-radius: 9px; padding: 11px 13px;
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  background: var(--surface);
+}
+.cov-name { font-size: 13.5px; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+.cov-ind { font-size: 11.5px; color: var(--muted); }
+.dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; background: var(--reach); flex: none; }
+.dot.live { background: var(--perfect); }
+.cov a { font-size: 12px; color: var(--accent); text-decoration: none; white-space: nowrap; }
+.cov a:hover { text-decoration: underline; }
+
+/* ── Health ──────────────────────────────────────────────── */
+.health-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 8px; }
+.hrow {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  border: 1px solid var(--border); border-radius: 8px; padding: 9px 12px; font-size: 13px;
+}
+.hrow .n { font-weight: 600; }
+.hrow small { color: var(--muted); font-size: 11.5px; }
+.hrow .ok { color: var(--perfect); font-weight: 600; font-size: 12px; }
+.hrow .no { color: var(--muted); font-size: 11.5px; }
+
+.foot { padding: 24px 20px 40px; color: var(--muted); font-size: 12.5px; text-align: center; }
+
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="wrap topbar-inner">
+    <div class="brand">
+      <span class="brand-mark">IJS</span>
+      <div>
+        <h1>India Job Scanner</h1>
+        <p>Live openings from top Indian employers, ranked by real eligibility</p>
+      </div>
+    </div>
+    <nav class="tabs" role="tablist">
+      <button class="tab is-active" data-tab="search" role="tab">Find jobs</button>
+      <button class="tab" data-tab="coverage" role="tab">Company coverage</button>
+      <button class="tab" data-tab="health" role="tab">Connector status</button>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- ══════════════ SEARCH ══════════════ -->
+  <section id="panel-search" class="panel">
+
+    <form id="profile-form" class="card form">
+      <div class="form-head">
+        <h2>Tell the scanner about you</h2>
+        <p>Everything is optional except the role. The more you fill in, the sharper the ranking.</p>
+      </div>
+
+      <div class="grid">
+        <label class="field span2">
+          <span class="label">What role are you looking for? <b class="req">required</b></span>
+          <input id="roleText" type="text" placeholder="e.g. Financial Analyst, Investment Banking Associate, Product Manager" autocomplete="off" required>
+          <span class="hint">Type it the way it would appear in a job title.</span>
+        </label>
+
+        <label class="field">
+          <span class="label">Years of experience</span>
+          <div class="years-row">
+            <input id="years" type="range" min="0" max="20" step="1" value="1">
+            <output id="yearsOut" class="years-out">1 yr</output>
+          </div>
+          <span class="hint">0 means fresher / final year.</span>
+        </label>
+
+        <label class="field">
+          <span class="label">Open to remote roles?</span>
+          <select id="openToRemote">
+            <option value="yes" selected>Yes — include remote jobs</option>
+            <option value="no">No — on-site in my cities only</option>
+          </select>
+        </label>
+
+        <div class="field span2">
+          <span class="label">Role family <span class="opt">pick up to 3 — teaches the scanner your vocabulary</span></span>
+          <div id="roleFamilies" class="chips"></div>
+        </div>
+
+        <div class="field span2">
+          <span class="label">Preferred locations <span class="opt">leave empty for anywhere in India</span></span>
+          <div id="locations" class="chips"></div>
+        </div>
+
+        <div class="field span2">
+          <span class="label">Target industries <span class="opt">optional — boosts matches in these sectors</span></span>
+          <div id="industries" class="chips chips-sm"></div>
+        </div>
+
+        <label class="field span2">
+          <span class="label">Your background</span>
+          <textarea id="background" rows="3" placeholder="e.g. B.Com from SRCC, 1 year as EA to CFO at an NBFC, ACCA part-qualified. Strong in Excel, financial modelling, MIS reporting, board reporting."></textarea>
+          <span class="hint">Plain sentences are fine — qualifications, tools, sectors you have worked in.</span>
+        </label>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary" id="scanBtn">Scan career portals</button>
+        <button type="button" class="btn btn-ghost" id="resetBtn">Reset</button>
+        <span class="saved-note" id="savedNote"></span>
+      </div>
+    </form>
+
+    <div id="status" class="status" hidden></div>
+
+    <section id="results" hidden>
+      <div class="kpis" id="kpis"></div>
+
+      <div class="results-head">
+        <h2>Matched openings</h2>
+        <div class="filters">
+          <label class="mini">
+            Show
+            <select id="filterBand">
+              <option value="eligible" selected>Eligible only</option>
+              <option value="all">Everything found</option>
+              <option value="perfect">Perfect fits only</option>
+            </select>
+          </label>
+          <label class="mini">
+            Industry
+            <select id="filterIndustry"><option value="">All</option></select>
+          </label>
+          <button type="button" class="btn btn-small" id="downloadCsv">Download CSV</button>
+        </div>
+      </div>
+
+      <div id="jobList" class="job-list"></div>
+      <p id="emptyNote" class="empty" hidden></p>
+    </section>
+  </section>
+
+  <!-- ══════════════ COVERAGE ══════════════ -->
+  <section id="panel-coverage" class="panel" hidden>
+    <div class="card">
+      <div class="form-head">
+        <h2>Companies this bot covers</h2>
+        <p>Every company below is one click from a live search. <b class="dot live"></b> Live feed means the scanner reads its openings automatically. The rest open with your role pre-filled.</p>
+      </div>
+      <div class="coverage-controls">
+        <input id="coverageSearch" type="search" placeholder="Search company or industry…">
+        <select id="coverageIndustry"><option value="">All industries</option></select>
+        <label class="mini check"><input type="checkbox" id="coverageLiveOnly"> Live feeds only</label>
+      </div>
+      <div id="coverageStats" class="coverage-stats"></div>
+      <div id="coverageList" class="coverage-list"></div>
+    </div>
+  </section>
+
+  <!-- ══════════════ HEALTH ══════════════ -->
+  <section id="panel-health" class="panel" hidden>
+    <div class="card">
+      <div class="form-head">
+        <h2>Connector status</h2>
+        <p>Which career portals answered on the last scan. A portal that stops responding is skipped automatically — the company still appears under Coverage.</p>
+      </div>
+      <div id="healthList" class="health-list">
+        <p class="empty">Run a scan first and the results will appear here.</p>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="foot wrap">
+  <p>Runs entirely on your own Netlify site or your own machine. No AI credits are used after setup — the scanner is plain code.</p>
+</footer>
+
+<script>
+/* India Job Scanner — front end. Vanilla JS, no build step, no dependencies. */
+
+const $ = (s) => document.querySelector(s);
+const $$ = (s) => [...document.querySelectorAll(s)];
+
+const LOCATIONS = ['Bengaluru', 'Mumbai', 'Delhi', 'Gurugram', 'Noida', 'Hyderabad', 'Pune', 'Chennai', 'Kolkata', 'Ahmedabad', 'Jaipur', 'Kochi', 'Chandigarh', 'Indore', 'Remote'];
+const STORE_KEY = 'ijs.profile.v1';
+
+let META = { industries: [], roleFamilies: [], companies: [] };
+let LAST = null;
+
+/* ───────────────── Tabs ───────────────── */
+$$('.tab').forEach((t) => {
+  t.onclick = () => {
+    $$('.tab').forEach((x) => x.classList.toggle('is-active', x === t));
+    ['search', 'coverage', 'health'].forEach((p) => {
+      $(`#panel-${p}`).hidden = p !== t.dataset.tab;
+    });
+  };
+});
+
+/* ───────────────── Chip helpers ───────────────── */
+function renderChips(container, values, limit) {
+  container.innerHTML = '';
+  values.forEach((v) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'chip';
+    b.textContent = v;
+    b.onclick = () => {
+      const on = container.querySelectorAll('.chip.on').length;
+      if (!b.classList.contains('on') && limit && on >= limit) return;
+      b.classList.toggle('on');
+      saveProfile();
+    };
+    container.appendChild(b);
+  });
+}
+const chipValues = (sel) => $$(`${sel} .chip.on`).map((c) => c.textContent);
+function setChips(sel, values = []) {
+  $$(`${sel} .chip`).forEach((c) => c.classList.toggle('on', values.includes(c.textContent)));
+}
+
+/* ───────────────── Profile persistence ───────────────── */
+function readProfile() {
+  return {
+    roleText: $('#roleText').value.trim(),
+    roleFamilies: chipValues('#roleFamilies'),
+    locations: chipValues('#locations'),
+    targetIndustries: chipValues('#industries'),
+    background: $('#background').value.trim(),
+    years: Number($('#years').value),
+    openToRemote: $('#openToRemote').value === 'yes',
+  };
+}
+function saveProfile() {
+  try {
+    localStorage.setItem(STORE_KEY, JSON.stringify(readProfile()));
+    $('#savedNote').textContent = 'Saved on this device';
+  } catch { /* storage disabled — harmless */ }
+}
+function loadProfile() {
+  try {
+    const p = JSON.parse(localStorage.getItem(STORE_KEY) || 'null');
+    if (!p) return;
+    $('#roleText').value = p.roleText || '';
+    $('#background').value = p.background || '';
+    $('#years').value = p.years ?? 1;
+    $('#openToRemote').value = p.openToRemote === false ? 'no' : 'yes';
+    setChips('#roleFamilies', p.roleFamilies);
+    setChips('#locations', p.locations);
+    setChips('#industries', p.targetIndustries);
+    $('#savedNote').textContent = 'Loaded your last search';
+  } catch { /* ignore */ }
+}
+
+$('#years').oninput = () => {
+  const v = Number($('#years').value);
+  $('#yearsOut').textContent = v === 0 ? 'Fresher' : v >= 20 ? '20+ yrs' : `${v} yr${v === 1 ? '' : 's'}`;
+};
+['#roleText', '#background', '#openToRemote', '#years'].forEach((s) => {
+  $(s).addEventListener('change', saveProfile);
+});
+
+$('#resetBtn').onclick = () => {
+  try { localStorage.removeItem(STORE_KEY); } catch {}
+  $('#profile-form').reset();
+  $$('.chip.on').forEach((c) => c.classList.remove('on'));
+  $('#years').dispatchEvent(new Event('input'));
+  $('#savedNote').textContent = '';
+  $('#results').hidden = true;
+};
+
+/* ───────────────── Boot ───────────────── */
+const BACKEND_MISSING =
+  'The scanner backend is not running on this site. A Netlify drag-and-drop deploy publishes ' +
+  'the pages but does not deploy the function that reads career portals. Deploy with the Netlify ' +
+  'CLI instead — run "npm run deploy" in this folder — or connect the folder to Netlify through ' +
+  'GitHub. See START-HERE.txt, "If your Netlify site says the backend is missing".';
+
+/** Fetch JSON and fail loudly-but-clearly when the backend served HTML instead. */
+async function apiFetch(url, opts) {
+  const res = await fetch(url, opts);
+  const text = await res.text();
+  const looksLikeHtml = /^\s*<(!doctype|html)/i.test(text);
+  if (looksLikeHtml || res.status === 404) throw new Error(BACKEND_MISSING);
+  try {
+    return JSON.parse(text);
+  } catch {
+    throw new Error(`Backend returned something unreadable (HTTP ${res.status}). ${BACKEND_MISSING}`);
+  }
+}
+
+async function boot() {
+  renderChips($('#locations'), LOCATIONS, 5);
+  try {
+    META = await apiFetch('/api?action=companies');
+  } catch (err) {
+    setStatus(err.message, true);
+  }
+  renderChips($('#roleFamilies'), META.roleFamilies || [], 3);
+  renderChips($('#industries'), META.industries || [], 0);
+  fillSelect($('#coverageIndustry'), META.industries || []);
+  fillSelect($('#filterIndustry'), META.industries || []);
+  loadProfile();
+  $('#years').dispatchEvent(new Event('input'));
+  renderCoverage();
+}
+function fillSelect(sel, values) {
+  values.forEach((v) => {
+    const o = document.createElement('option');
+    o.value = v; o.textContent = v;
+    sel.appendChild(o);
+  });
+}
+function setStatus(msg, isErr = false) {
+  const el = $('#status');
+  el.hidden = !msg;
+  el.textContent = msg || '';
+  el.classList.toggle('err', isErr);
+}
+
+/* ───────────────── Scan ───────────────── */
+$('#profile-form').onsubmit = async (e) => {
+  e.preventDefault();
+  const profile = readProfile();
+  if (!profile.roleText) return;
+  saveProfile();
+
+  $('#scanBtn').disabled = true;
+  $('#scanBtn').textContent = 'Scanning…';
+  setStatus('Reading career portals across industries. This takes 5–15 seconds.');
+
+  try {
+    const data = await apiFetch('/api?action=scan', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(profile),
+    });
+    if (data.error) throw new Error(data.error);
+    LAST = data;
+    setStatus(`Scanned ${data.counts.scanned} live openings from ${data.counts.companiesLive} responding portals in ${(data.tookMs / 1000).toFixed(1)}s.`);
+    renderKPIs(data);
+    renderJobs();
+    renderHealth(data.health);
+    renderCoverage();
+    $('#results').hidden = false;
+  } catch (err) {
+    setStatus(err.message === BACKEND_MISSING ? err.message : `Scan failed: ${err.message}`, true);
+  } finally {
+    $('#scanBtn').disabled = false;
+    $('#scanBtn').textContent = 'Scan career portals';
+  }
+};
+
+function renderKPIs(d) {
+  const c = d.counts;
+  $('#kpis').innerHTML = [
+    ['hi', c.perfect, 'Perfect fits'],
+    ['', c.strong, 'Strong fits'],
+    ['', c.eligible, 'You are eligible for'],
+    ['', c.scanned, 'Openings scanned'],
+    ['', `${c.companiesLive}/${c.connectorsConfigured}`, 'Portals responding'],
+  ].map(([cls, n, l]) => `<div class="kpi ${cls}"><div class="n">${n}</div><div class="l">${l}</div></div>`).join('');
+}
+
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
+
+function visibleJobs() {
+  if (!LAST) return [];
+  const band = $('#filterBand').value;
+  const ind = $('#filterIndustry').value;
+  return LAST.jobs.filter((j) => {
+    if (ind && j.industry !== ind) return false;
+    if (band === 'eligible') return j.match.eligible;
+    if (band === 'perfect') return j.match.bandClass === 'perfect';
+    return true;
+  });
+}
+
+function renderJobs() {
+  const list = visibleJobs();
+  const el = $('#jobList');
+  $('#emptyNote').hidden = list.length > 0;
+  if (!list.length) {
+    el.innerHTML = '';
+    $('#emptyNote').textContent = 'Nothing matched at this filter. Try "Everything found", widen your locations, or use a broader role title.';
+    return;
+  }
+  el.innerHTML = list.slice(0, 120).map((j) => {
+    const m = j.match;
+    const bar = (v, max) => `<i><b style="width:${Math.round((v / max) * 100)}%"></b></i>`;
+    const why = [
+      ...m.reasons.map((r) => `<span>${esc(r)}</span>`),
+      ...m.gaps.map((g) => `<span class="gap">${esc(g)}</span>`),
+    ].join('');
+    const posted = j.postedAt ? new Date(j.postedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) : null;
+    return `
+    <article class="job ${m.bandClass}">
+      <div>
+        <h3 class="job-title"><a href="${esc(j.url)}" target="_blank" rel="noopener">${esc(j.title)}</a></h3>
+        <div class="job-meta">
+          <b>${esc(j.company)}</b>
+          <span>${esc(j.location || 'Location not stated')}</span>
+          <span>${esc(j.industry)}</span>
+          <span>Needs ${m.experienceBand.min}–${m.experienceBand.max === 30 ? '∞' : m.experienceBand.max} yrs</span>
+          ${posted ? `<span>Posted ${posted}</span>` : ''}
+          ${j.salary ? `<span>${esc(j.salary)}</span>` : ''}
+        </div>
+        <div class="why">${why}</div>
+      </div>
+      <div class="job-right">
+        <div class="score">${m.total}</div>
+        <span class="badge ${m.bandClass}">${m.bandLabel}</span>
+        <div class="bars" title="Role / Experience / Location / Background">
+          ${bar(m.breakdown.role, 40)}${bar(m.breakdown.experience, 25)}${bar(m.breakdown.location, 20)}${bar(m.breakdown.background, 15)}
+        </div>
+        <a class="apply" href="${esc(j.url)}" target="_blank" rel="noopener">Open role</a>
+      </div>
+    </article>`;
+  }).join('');
+}
+
+$('#filterBand').onchange = renderJobs;
+$('#filterIndustry').onchange = renderJobs;
+
+/* ───────────────── CSV ───────────────── */
+$('#downloadCsv').onclick = () => {
+  const rows = visibleJobs();
+  if (!rows.length) return;
+  const head = ['Score', 'Verdict', 'Eligible', 'Title', 'Company', 'Industry', 'Location', 'Exp Min', 'Exp Max', 'Posted', 'Why matched', 'Gaps', 'Source', 'URL'];
+  const q = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+  const csv = [head.join(',')].concat(rows.map((j) => [
+    j.match.total, j.match.bandLabel, j.match.eligible ? 'Yes' : 'No',
+    j.title, j.company, j.industry, j.location,
+    j.match.experienceBand.min, j.match.experienceBand.max,
+    j.postedAt ? new Date(j.postedAt).toISOString().slice(0, 10) : '',
+    j.match.reasons.join('; '), j.match.gaps.join('; '), j.source, j.url,
+  ].map(q).join(','))).join('\n');
+
+  const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `job-matches-${new Date().toISOString().slice(0, 10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+};
+
+/* ───────────────── Coverage ───────────────── */
+function coverageRows() {
+  const src = LAST?.coverage || (META.companies || []).map((c) => ({
+    ...c,
+    searchLink: `https://www.google.com/search?q=${encodeURIComponent(c.name + ' careers India')}`,
+    portalSearch: c.careers,
+  }));
+  const q = $('#coverageSearch').value.trim().toLowerCase();
+  const ind = $('#coverageIndustry').value;
+  const liveOnly = $('#coverageLiveOnly').checked;
+  return src.filter((c) => {
+    if (ind && c.industry !== ind) return false;
+    if (liveOnly && !c.live) return false;
+    if (q && !(`${c.name} ${c.industry}`.toLowerCase().includes(q))) return false;
+    return true;
+  }).sort((a, b) => (a.tier - b.tier) || a.name.localeCompare(b.name));
+}
+
+function renderCoverage() {
+  const rows = coverageRows();
+  const all = LAST?.coverage || META.companies || [];
+  $('#coverageStats').textContent = `Showing ${rows.length} of ${all.length} companies · ${all.filter((c) => c.live).length} have a live feed the scanner reads automatically.`;
+  $('#coverageList').innerHTML = rows.map((c) => `
+    <div class="cov">
+      <div>
+        <div class="cov-name"><span class="dot ${c.live ? 'live' : ''}"></span>${esc(c.name)}</div>
+        <div class="cov-ind">${esc(c.industry)}</div>
+      </div>
+      <div style="text-align:right">
+        <a href="${esc(c.careers)}" target="_blank" rel="noopener">Careers</a><br>
+        <a href="${esc(c.searchLink)}" target="_blank" rel="noopener">Search roles</a>
+      </div>
+    </div>`).join('') || '<p class="empty">No companies match that filter.</p>';
+}
+$('#coverageSearch').oninput = renderCoverage;
+$('#coverageIndustry').onchange = renderCoverage;
+$('#coverageLiveOnly').onchange = renderCoverage;
+
+/* ───────────────── Health ───────────────── */
+function renderHealth(health = []) {
+  const sorted = [...health].sort((a, b) => (b.ok - a.ok) || (b.count - a.count));
+  $('#healthList').innerHTML = sorted.map((h) => `
+    <div class="hrow">
+      <div>
+        <div class="n">${esc(h.company)}</div>
+        <small>${esc(h.source)}</small>
+      </div>
+      <div>${h.ok
+        ? `<span class="ok">${h.count} in India</span>`
+        : `<span class="no">${esc(h.error || 'no response')}</span>`}</div>
+    </div>`).join('');
+}
+
+boot();
+
+</script>
+</body>
+</html>
